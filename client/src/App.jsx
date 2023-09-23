@@ -2,6 +2,19 @@ import { useCallback, useEffect, useState } from 'react'
 
 function App() {
   const [photos, setPhotos] = useState([])
+
+  // Convert fetch to async function below
+  //   fetch('http://localhost:3000/photos?_page=1&_limit=10')
+  //     .then((res) => res.json())
+  //     .then(setPhotos)
+  // }
+
+  // Make above fetch with promise to async function
+  async function fetchPhotos() {
+    const res = await fetch('http://localhost:3000/photos?_page=1&_limit=10')
+    const photos = await res.json()
+    setPhotos(photos)
+  }
   // console.log(photos)
 
   // When is user at very end of list of photos best way is to use a useCallback to check that.
@@ -13,17 +26,16 @@ function App() {
       if (entries[0].isIntersecting) {
         console.log(entries)
         //TODO: Load next elements
-        console.log("Last element show")
-        observer.unobserve(image)
+        fetchPhotos()
+        console.log('Last element show')
+        observer.unobserve(image) // Image shows up one time and then we stop it
       }
     })
     observer.observe(image)
   }, [])
 
   useEffect(() => {
-    fetch('http://localhost:3000/photos?_page=1&_limit=10')
-      .then((res) => res.json())
-      .then(setPhotos)
+    fetchPhotos()
   }, [])
 
   return (
