@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { parseLinkHeader } from './parseLinkHeader'
 
 function App() {
   const [photos, setPhotos] = useState([])
+  const nextPhotoUrlRef = useRef()
 
   // Convert fetch to async function below
   //   fetch('http://localhost:3000/photos?_page=1&_limit=10')
@@ -10,10 +12,17 @@ function App() {
   // }
 
   // Make above fetch with promise to async function
-  async function fetchPhotos() {
-    const res = await fetch('http://localhost:3000/photos?_page=1&_limit=10')
+  async function fetchPhotos(url, { overwrite = false } = {}) {
+    const res = await fetch(url)
+    nextPhotoUrlRef.current = parseLinkHeader(res.headers.get('Link')).next
     const photos = await res.json()
-    setPhotos(photos)
+    if (overwrite) {
+      setPhotos(photos)
+    } else {
+      setPhotos((prevPhotos) => {
+        return [...prevPhotos, ...photos]
+      })
+    }
   }
   // console.log(photos)
 
@@ -24,9 +33,10 @@ function App() {
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
+        nextPhotoUrlRef.current
         console.log(entries)
         //TODO: Load next elements
-        fetchPhotos()
+        fetchPhotos(nextPhotoUrlRef.current)
         console.log('Last element show')
         observer.unobserve(image) // Image shows up one time and then we stop it
       }
@@ -35,7 +45,9 @@ function App() {
   }, [])
 
   useEffect(() => {
-    fetchPhotos()
+    fetchPhotos('http://localhost:3000/photos?_page=1&_limit=10', {
+      overwrite: true,
+    })
   }, [])
 
   return (
