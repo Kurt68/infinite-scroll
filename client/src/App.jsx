@@ -35,6 +35,7 @@ function App() {
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
+        nextPhotoUrlRef.current
         console.log(entries)
         //TODO: Load next elements
         fetchPhotos(nextPhotoUrlRef.current)
