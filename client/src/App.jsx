@@ -15,8 +15,10 @@ function App() {
   async function fetchPhotos(url, { overwrite = false } = {}) {
     const res = await fetch(url)
     nextPhotoUrlRef.current = parseLinkHeader(res.headers.get('Link')).next
+     console.log(parseLinkHeader(res.headers.get('Link')))
     const photos = await res.json()
     if (overwrite) {
+      //console.log(overwrite)
       setPhotos(photos)
     } else {
       setPhotos((prevPhotos) => {
@@ -33,7 +35,6 @@ function App() {
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        nextPhotoUrlRef.current
         console.log(entries)
         //TODO: Load next elements
         fetchPhotos(nextPhotoUrlRef.current)
